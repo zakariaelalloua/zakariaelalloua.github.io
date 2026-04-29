@@ -189,6 +189,25 @@
             } else { alert("Compila i campi correttamente!"); }
         }
 
+        const povData = {
+            "Bolzano-Lago di Braies": {
+                text: "POV: I prati di Ferrara",
+                coords: "46.7214,12.1332"
+            },
+            "Bolzano-Ortisei": {
+                text: "POV: Castel Forte (Trostburg)",
+                coords: "46.5910,11.5367"
+            },
+            "Merano-Lago di Braies": {
+                text: "POV: Contrasto Meleti/Dolomiti",
+                coords: "46.7322,11.5833"
+            },
+            "Merano-Ortisei": {
+                text: "POV: Gruppo del Sassolungo",
+                coords: "46.5761,11.6601"
+            }
+        };
+        
         function updateBatt(v) {
             currentBatt = v;
             document.getElementById('b-val').innerText = v + "%";
@@ -207,14 +226,21 @@
         function loadMap() {
             const s = document.getElementById('start').value;
             const e = document.getElementById('end').value;
+
+            // Recupero dati POV e Coordinate
+            const routeKey = `${s}-${e}`;
+            const povObj = povData[routeKey];
+            
             let query = (currentBatt <= 20) ? "stazioni ricarica elettrica" : "hotel e ristoranti panoramici";
             let color = (currentBatt <= 20) ? "var(--red)" : "var(--dark)";
             
             const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(query)}&output=embed`;
             
             document.getElementById('map-view').innerHTML = `
-                <div class="map-badge" style="background:${color}">${query.toUpperCase()} SUL PERCORSO</div>
-                <iframe src="${url}"></iframe>
+                <div class="map-badge" style="background:${color}; top: 20px; border: 2px solid white;">
+                    📍 ${badgeText.toUpperCase()}
+                </div>
+                <iframe src="${url}" style="filter: grayscale(0.2) contrast(1.1);"></iframe>
             `;
         }
     </script>
