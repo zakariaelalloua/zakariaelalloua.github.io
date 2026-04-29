@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Found-it — Mobility Expert</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00D166; --blue: #00A3FF; --red: #FF4D4D; --dark: #0F172A;
+            --radius: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; height: 100vh; overflow: hidden; background: #f8fafc; }
+
+        /* --- MENU PRINCIPALE DINAMICO --- */
+        #auth-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1); }
+        #auth-overlay.hidden { transform: translateY(-100%); }
+
+        .auth-side {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; color: white; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        /* Effetti Hover */
+        .side-login { background: #00b358; border-right: 4px solid rgba(0,0,0,0.1); }
+        .side-reg { background: #008be6; }
+        
+        .auth-side:hover { flex: 1.6; filter: brightness(1.1); }
+        .auth-side h2 { 
+            font-family: 'Syne'; font-size: 60px; text-transform: uppercase; letter-spacing: -2px;
+            transition: transform 0.5s; z-index: 2;
+        }
+        .auth-side:hover h2 { transform: scale(1.1); }
+
+        /* Icone di sfondo decorative */
+        .side-bg-icon {
+            position: absolute; font-size: 20rem; opacity: 0.1; bottom: -50px; right: -50px;
+            transform: rotate(-15deg); transition: 0.5s;
+        }
+        .auth-side:hover .side-bg-icon { transform: rotate(0deg) scale(1.2); opacity: 0.2; }
+
+        .logo-box { 
+            background: white; padding: 25px; border-radius: 30px; margin-bottom: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 2;
+        }
+        .logo-box img { height: 80px; }
+
+        /* FORM OVERLAY */
+        .form-container { 
+            position: absolute; inset: 0; background: white; display: none; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            color: var(--dark); padding: 40px; z-index: 10;
+        }
+        .form-container.active { display: flex; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- DASHBOARD --- */
+        nav { height: 80px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+        .main-layout { display: grid; grid-template-columns: 360px 1fr; height: calc(100vh - 80px); gap: 20px; padding: 20px; }
+        
+        .side-panel { display: flex; flex-direction: column; gap: 15px; }
+        .config-card { background: white; padding: 22px; border-radius: var(--radius); border: 1px solid #edf2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        label { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; }
+        
+        .input-ui { 
+            width: 100%; padding: 14px; border-radius: 14px; border: 2px solid #f1f5f9; 
+            background: #f8fafc; font-weight: 700; font-family: inherit; margin-bottom: 12px; 
+            transition: 0.3s;
+        }
+        .input-ui:focus { border-color: var(--blue); outline: none; background: white; }
+        
+        .btn-action { 
+            width: 100%; padding: 20px; border: none; border-radius: 50px; 
+            font-weight: 800; text-transform: uppercase; cursor: pointer; color: white; transition: 0.4s;
+        }
+        .btn-green { background: var(--green); }
+        .btn-blue { background: var(--blue); }
+        .btn-red { background: var(--red); }
+        
+        .btn-back { 
+            padding: 10px 20px; border-radius: 50px; border: 2px solid #f1f5f9; 
+            background: white; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+        .btn-back:hover { background: #f1f5f9; color: var(--red); }
+
+        /* MAPPA */
+        #map-view { background: #e2e8f0; border-radius: 40px; border: 12px solid white; box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .map-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 30px; border-radius: 50px; color: white; font-weight: 800; font-size: 11px; z-index: 10; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="auth-side side-login" onclick="openForm('login')">
+            <div class="side-bg-icon">🔑</div>
+            <div class="logo-box"><img src="logo.png" alt="Logo"></div>
+            <h2>Accedi</h2>
+            
+            <div class="form-container" id="form-login">
+                <h2 style="color: var(--green); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px;">Bentornato Driver</h2>
+                <div style="width: 100%; max-width: 350px;">
+                    <input type="email" id="l-email" class="input-ui" placeholder="Email">
+                    <input type="password" class="input-ui" placeholder="Password">
+                    <button class="btn-action btn-green" onclick="processAuth('login')">Accedi al Sistema</button>
+                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="event.stopPropagation(); closeForms()">← Indietro</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-side side-reg" onclick="openForm('reg')">
+            <div class="side-bg-icon">🚀</div>
+            <div class="logo-box"><img src="logo.png" alt="Logo"></div>
+            <h2>Registrati</h2>
+
+            <div class="form-container" id="form-reg">
+                <h2 style="color: var(--blue); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px;">Nuovo Profilo</h2>
+                <div style="width: 100%; max-width: 350px;">
+                    <input type="text" id="r-nome" class="input-ui" placeholder="Nome">
+                    <input type="text" id="r-cognome" class="input-ui" placeholder="Cognome">
+                    <input type="email" id="r-email" class="input-ui" placeholder="Indirizzo Email">
+                    <input type="password" class="input-ui" placeholder="Password">
+                    <button class="btn-action btn-blue" onclick="processAuth('reg')">Crea Account</button>
+                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="event.stopPropagation(); closeForms()">← Indietro</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <img src="logo.png" style="height:45px">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <span id="user-tag" style="font-weight: 800; color: var(--green); font-size: 12px;"></span>
+            <button class="btn-back" onclick="backToMenu()">Esci dal Sistema</button>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <aside class="side-panel">
+            <div class="config-card">
+                <label>🔋 Livello Energia</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                    <h2 id="b-val" style="font-family:Syne; font-size:35px; color:var(--green)">80%</h2>
+                    <span id="v-icon" style="font-size:28px">🚗</span>
+                </div>
+                <input type="range" id="b-slider" min="1" max="100" value="80" style="width:100%; accent-color:var(--green)" oninput="updateBatt(this.value)">
+            </div>
+
+            <div class="config-card">
+                <label>⚡ Veicolo Selezionato</label>
+                <select id="v-select" class="input-ui" onchange="document.getElementById('v-icon').innerText = this.value">
+                    <option value="🚗">Auto Elettrica</option>
+                    <option value="🛵">Scooter Elettrico</option>
+                    <option value="🚲">Bici Elettrica</option>
+                </select>
+            </div>
+
+            <div class="config-card">
+                <label>📍 Itinerario</label>
+                <select id="start" class="input-ui"><option value="Bolzano">Bolzano</option><option value="Merano">Merano</option></select>
+                <select id="end" class="input-ui"><option value="Lago di Braies">Lago di Braies</option><option value="Ortisei">Ortisei</option></select>
+            </div>
+
+            <button id="go-btn" class="btn-action btn-green" onclick="loadMap()">Analizza Viaggio ➔</button>
+        </aside>
+
+        <main id="map-view">
+            <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight:700">
+                Analisi della mobilità pronta
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentBatt = 80;
+
+        function openForm(id) { closeForms(); document.getElementById('form-'+id).classList.add('active'); }
+        function closeForms() { document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active')); }
+        function backToMenu() { document.getElementById('auth-overlay').classList.remove('hidden'); closeForms(); }
+
+        function processAuth(type) {
+            const email = (type === 'login') ? document.getElementById('l-email').value : document.getElementById('r-email').value;
+            const nome = (type === 'reg') ? document.getElementById('r-nome').value : "";
+            if(email.includes('@')) {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('user-tag').innerText = "DRIVER: " + (nome || email.split('@')[0]).toUpperCase();
+            } else { alert("Compila i campi correttamente!"); }
+        }
+
+        function updateBatt(v) {
+            currentBatt = v;
+            document.getElementById('b-val').innerText = v + "%";
+            const btn = document.getElementById('go-btn');
+            if(v <= 20) {
+                document.getElementById('b-val').style.color = "var(--red)";
+                btn.className = "btn-action btn-red";
+                btn.innerText = "SOS RICARICA ⚡";
+            } else {
+                document.getElementById('b-val').style.color = "var(--green)";
+                btn.className = "btn-action btn-green";
+                btn.innerText = "Analizza Viaggio ➔";
+            }
+        }
+
+        function loadMap() {
+            const s = document.getElementById('start').value;
+            const e = document.getElementById('end').value;
+            let query = (currentBatt <= 20) ? "stazioni ricarica elettrica" : "hotel e ristoranti panoramici";
+            let color = (currentBatt <= 20) ? "var(--red)" : "var(--dark)";
+            
+            const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(query)}&output=embed`;
+            
+            document.getElementById('map-view').innerHTML = `
+                <div class="map-badge" style="background:${color}">${query.toUpperCase()} SUL PERCORSO</div>
+                <iframe src="${url}"></iframe>
+            `;
+        }
+    </script>
+</body>
+</html>
