@@ -230,8 +230,9 @@
             // Recupero dati POV e Coordinate
             const routeKey = `${s}-${e}`;
             const povObj = povData[routeKey];
-            
-            let query = (currentBatt <= 20) ? "stazioni ricarica elettrica" : "hotel e ristoranti panoramici";
+
+            let destinationCoord = (currentBatt <= 20) ? "stazioni ricarica" : povObj.coords;
+            let badgeText = (currentBatt <= 20) ? "RICARICA NECESSARIA" : povObj.text;
             let color = (currentBatt <= 20) ? "var(--red)" : "var(--dark)";
             
             const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(query)}&output=embed`;
