@@ -99,13 +99,14 @@
             <div class="logo-box"><img src="logo.png" alt="Logo"></div>
             <h2>Accedi</h2>
             
-            <div class="form-container" id="form-login">
-                <h2 style="color: var(--green); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px;">Bentornato Driver</h2>
+            <!-- CORREZIONE: Aggiunto stopPropagation per evitare conflitti di click sui campi -->
+            <div class="form-container" id="form-login" onclick="event.stopPropagation()">
+                <h2 style="color: var(--green); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px; margin-left: 20px; font-size: 42px;">Bentornato Driver</h2>
                 <div style="width: 100%; max-width: 350px;">
                     <input type="email" id="l-email" class="input-ui" placeholder="Email">
                     <input type="password" class="input-ui" placeholder="Password">
                     <button class="btn-action btn-green" onclick="processAuth('login')">Accedi al Sistema</button>
-                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="event.stopPropagation(); closeForms()">← Indietro</p>
+                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="closeForms()">← Indietro</p>
                 </div>
             </div>
         </div>
@@ -115,7 +116,8 @@
             <div class="logo-box"><img src="logo.png" alt="Logo"></div>
             <h2>Registrati</h2>
 
-            <div class="form-container" id="form-reg">
+            <!-- CORREZIONE: Aggiunto stopPropagation per evitare conflitti di click sui campi -->
+            <div class="form-container" id="form-reg" onclick="event.stopPropagation()">
                 <h2 style="color: var(--blue); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px;">Nuovo Profilo</h2>
                 <div style="width: 100%; max-width: 350px;">
                     <input type="text" id="r-nome" class="input-ui" placeholder="Nome">
@@ -123,7 +125,7 @@
                     <input type="email" id="r-email" class="input-ui" placeholder="Indirizzo Email">
                     <input type="password" class="input-ui" placeholder="Password">
                     <button class="btn-action btn-blue" onclick="processAuth('reg')">Crea Account</button>
-                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="event.stopPropagation(); closeForms()">← Indietro</p>
+                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="closeForms()">← Indietro</p>
                 </div>
             </div>
         </div>
@@ -189,6 +191,25 @@
             } else { alert("Compila i campi correttamente!"); }
         }
 
+        const povData = {
+            "Bolzano-Lago di Braies": {
+                text: "POV: I prati di Ferrara",
+                coords: "46.7214,12.1332"
+            },
+            "Bolzano-Ortisei": {
+                text: "POV: Castel Forte (Trostburg)",
+                coords: "46.5910,11.5367"
+            },
+            "Merano-Lago di Braies": {
+                text: "POV: Contrasto Meleti/Dolomiti",
+                coords: "46.7322,11.5833"
+            },
+            "Merano-Ortisei": {
+                text: "POV: Gruppo del Sassolungo",
+                coords: "46.5761,11.6601"
+            }
+        };
+        
         function updateBatt(v) {
             currentBatt = v;
             document.getElementById('b-val').innerText = v + "%";
@@ -207,14 +228,24 @@
         function loadMap() {
             const s = document.getElementById('start').value;
             const e = document.getElementById('end').value;
-            let query = (currentBatt <= 20) ? "stazioni ricarica elettrica" : "hotel e ristoranti panoramici";
+
+            // Recupero dati POV e Coordinate
+            const routeKey = `${s}-${e}`;
+            const povObj = povData[routeKey];
+
+            // Gestione stato della batteria
+            let destinationCoord = (currentBatt <= 20) ? "stazioni ricarica" : povObj.coords;
+            let badgeText = (currentBatt <= 20) ? "RICARICA NECESSARIA" : povObj.text;
             let color = (currentBatt <= 20) ? "var(--red)" : "var(--dark)";
             
-            const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(query)}&output=embed`;
+            // CORREZIONE: Sostituita la variabile inesistente 'query' con 'destinationCoord'
+            const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(destinationCoord)}&output=embed`;
             
             document.getElementById('map-view').innerHTML = `
-                <div class="map-badge" style="background:${color}">${query.toUpperCase()} SUL PERCORSO</div>
-                <iframe src="${url}"></iframe>
+                <div class="map-badge" style="background:${color}; top: 20px; border: 2px solid white;">
+                    📍 ${badgeText.toUpperCase()}
+                </div>
+                <iframe src="${url}" style="filter: grayscale(0.2) contrast(1.1);"></iframe>
             `;
         }
     </script>
