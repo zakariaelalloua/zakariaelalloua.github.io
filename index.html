@@ -3,251 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Found-it — Mobility Expert</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <title>Found-it — Dashboard Interattiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --green: #00D166; --blue: #00A3FF; --red: #FF4D4D; --dark: #0F172A;
-            --radius: 24px;
+            --green: #27AE60;
+            --blue-accent: #2D9CDB;
+            --bg: #F8FAF9;
+            --surface: rgba(255, 255, 255, 0.9);
+            --text: #1C2E24;
+            --muted: #667A70;
+            --border: rgba(0, 0, 0, 0.08);
+            --radius: 28px;
+            --shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; height: 100vh; overflow: hidden; background: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
 
-        /* --- MENU PRINCIPALE DINAMICO --- */
-        #auth-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1); }
-        #auth-overlay.hidden { transform: translateY(-100%); }
-
-        .auth-side {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; color: white; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
+        /* --- AUTH SYSTEM (DESIGN ORIGINALE) --- */
+        #auth-overlay {
+            position: fixed; inset: 0; z-index: 3000;
+            background: radial-gradient(circle at top left, #E8F5E9 0%, #FFFFFF 50%, #E3F2FD 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
         }
+        #auth-overlay.hidden { transform: translateY(-100%); pointer-events: none; }
+
+        .logo-placeholder {
+            width: auto; min-width: 100px; margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 20px; background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px); box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.3); padding: 15px;
+        }
+        .logo-placeholder img { max-height: 80px; width: auto; object-fit: contain; }
+
+        .auth-container { width: 90%; max-width: 800px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         
-        /* Effetti Hover */
-        .side-login { background: #00b358; border-right: 4px solid rgba(0,0,0,0.1); }
-        .side-reg { background: #008be6; }
-        
-        .auth-side:hover { flex: 1.6; filter: brightness(1.1); }
-        .auth-side h2 { 
-            font-family: 'Syne'; font-size: 60px; text-transform: uppercase; letter-spacing: -2px;
-            transition: transform 0.5s; z-index: 2;
+        /* Design originale schede */
+        .auth-choice { 
+            background: white; padding: 45px; border-radius: var(--radius); 
+            box-shadow: var(--shadow); cursor: pointer; text-align: center; transition: 0.3s;
+            border: 1px solid transparent;
         }
-        .auth-side:hover h2 { transform: scale(1.1); }
+        .auth-choice:hover { transform: translateY(-8px); border-color: var(--green); }
+        .auth-choice h2 { font-family: 'Syne'; font-size: 28px; margin-bottom: 5px; }
+        .auth-icon { font-size: 45px; margin-bottom: 15px; }
 
-        /* Icone di sfondo decorative */
-        .side-bg-icon {
-            position: absolute; font-size: 20rem; opacity: 0.1; bottom: -50px; right: -50px;
-            transform: rotate(-15deg); transition: 0.5s;
-        }
-        .auth-side:hover .side-bg-icon { transform: rotate(0deg) scale(1.2); opacity: 0.2; }
-
-        .logo-box { 
-            background: white; padding: 25px; border-radius: 30px; margin-bottom: 30px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 2;
-        }
-        .logo-box img { height: 80px; }
-
-        /* FORM OVERLAY */
-        .form-container { 
-            position: absolute; inset: 0; background: white; display: none; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            color: var(--dark); padding: 40px; z-index: 10;
-        }
-        .form-container.active { display: flex; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .form-card { background: white; padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; max-width: 420px; text-align: center; }
 
         /* --- DASHBOARD --- */
-        nav { height: 80px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
-        .main-layout { display: grid; grid-template-columns: 360px 1fr; height: calc(100vh - 80px); gap: 20px; padding: 20px; }
+        nav { padding: 15px 48px; background: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .nav-logo-img { height: 40px; }
         
-        .side-panel { display: flex; flex-direction: column; gap: 15px; }
-        .config-card { background: white; padding: 22px; border-radius: var(--radius); border: 1px solid #edf2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        label { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; }
+        .main-content { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+        .card { background: white; border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; }
         
-        .input-ui { 
-            width: 100%; padding: 14px; border-radius: 14px; border: 2px solid #f1f5f9; 
-            background: #f8fafc; font-weight: 700; font-family: inherit; margin-bottom: 12px; 
-            transition: 0.3s;
-        }
-        .input-ui:focus { border-color: var(--blue); outline: none; background: white; }
-        
-        .btn-action { 
-            width: 100%; padding: 20px; border: none; border-radius: 50px; 
-            font-weight: 800; text-transform: uppercase; cursor: pointer; color: white; transition: 0.4s;
-        }
-        .btn-green { background: var(--green); }
-        .btn-blue { background: var(--blue); }
-        .btn-red { background: var(--red); }
-        
-        .btn-back { 
-            padding: 10px 20px; border-radius: 50px; border: 2px solid #f1f5f9; 
-            background: white; font-weight: 700; cursor: pointer; transition: 0.3s;
-        }
-        .btn-back:hover { background: #f1f5f9; color: var(--red); }
+        /* Battery Selector (Range) */
+        .battery-control { width: 100%; margin: 15px 0; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--green); }
+        .battery-display { display: flex; justify-content: space-between; font-weight: 700; color: var(--green); margin-top: 5px; }
 
-        /* MAPPA */
-        #map-view { background: #e2e8f0; border-radius: 40px; border: 12px solid white; box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; color: var(--muted); }
+        select, input[type=text], input[type=email], input[type=password] { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #E0E7E3; background: #F9FBFA; font-family: inherit; }
+        
+        .btn-green { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--green), #2ECC71); color: white; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); }
+        
+        .map-container { width: 100%; height: 650px; border-radius: 20px; overflow: hidden; background: #eee; border: 1px solid var(--border); }
         iframe { width: 100%; height: 100%; border: none; }
-        .map-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 30px; border-radius: 50px; color: white; font-weight: 800; font-size: 11px; z-index: 10; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="auth-overlay">
-        <div class="auth-side side-login" onclick="openForm('login')">
-            <div class="side-bg-icon">🔑</div>
-            <div class="logo-box"><img src="logo.png" alt="Logo"></div>
-            <h2>Accedi</h2>
-            
-            <!-- CORREZIONE: Aggiunto stopPropagation per evitare conflitti di click sui campi -->
-            <div class="form-container" id="form-login" onclick="event.stopPropagation()">
-                <h2 style="color: var(--green); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px; margin-left: 20px; font-size: 42px;">Bentornato Driver</h2>
-                <div style="width: 100%; max-width: 350px;">
-                    <input type="email" id="l-email" class="input-ui" placeholder="Email">
-                    <input type="password" class="input-ui" placeholder="Password">
-                    <button class="btn-action btn-green" onclick="processAuth('login')">Accedi al Sistema</button>
-                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="closeForms()">← Indietro</p>
-                </div>
-            </div>
+<div id="auth-overlay">
+    <div class="logo-placeholder" id="main-logo-box"></div>
+
+    <div class="auth-container" id="initial-choice">
+        <div class="auth-choice" onclick="showForm('login')">
+            <div class="auth-icon">🔑</div>
+            <h2 style="color: var(--green);">Accedi</h2>
+            <p style="color: var(--muted);">Bentornato nella community</p>
         </div>
-
-        <div class="auth-side side-reg" onclick="openForm('reg')">
-            <div class="side-bg-icon">🚀</div>
-            <div class="logo-box"><img src="logo.png" alt="Logo"></div>
-            <h2>Registrati</h2>
-
-            <!-- CORREZIONE: Aggiunto stopPropagation per evitare conflitti di click sui campi -->
-            <div class="form-container" id="form-reg" onclick="event.stopPropagation()">
-                <h2 style="color: var(--blue); margin-bottom: 30px; font-family: 'Syne'; letter-spacing: -1px;">Nuovo Profilo</h2>
-                <div style="width: 100%; max-width: 350px;">
-                    <input type="text" id="r-nome" class="input-ui" placeholder="Nome">
-                    <input type="text" id="r-cognome" class="input-ui" placeholder="Cognome">
-                    <input type="email" id="r-email" class="input-ui" placeholder="Indirizzo Email">
-                    <input type="password" class="input-ui" placeholder="Password">
-                    <button class="btn-action btn-blue" onclick="processAuth('reg')">Crea Account</button>
-                    <p style="text-align: center; margin-top: 25px; font-weight: 700; color: #94a3b8; cursor: pointer;" onclick="closeForms()">← Indietro</p>
-                </div>
-            </div>
+        <div class="auth-choice" onclick="showForm('register')">
+            <div class="auth-icon">✨</div>
+            <h2 style="color: var(--blue-accent);">Registrati</h2>
+            <p style="color: var(--muted);">Inizia il tuo viaggio green</p>
         </div>
     </div>
 
-    <nav>
-        <img src="logo.png" style="height:45px">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <span id="user-tag" style="font-weight: 800; color: var(--green); font-size: 12px;"></span>
-            <button class="btn-back" onclick="backToMenu()">Esci dal Sistema</button>
+    <div id="login-panel" class="hidden">
+        <div class="form-card">
+            <h2 style="font-family: 'Syne'; color: var(--green);">Accedi</h2>
+            <input type="email" id="login-email" placeholder="Email" style="margin-top:20px">
+            <input type="password" placeholder="Password" style="margin-top:10px">
+            <button class="btn-green" style="margin-top:20px" onclick="completeAuth('login-email')">ENTRA ORA</button>
+            <p onclick="resetAuth()" style="margin-top:15px; cursor:pointer; text-decoration:underline; color: var(--muted);">Indietro</p>
         </div>
-    </nav>
+    </div>
 
-    <div class="main-layout">
-        <aside class="side-panel">
-            <div class="config-card">
-                <label>🔋 Livello Energia</label>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-                    <h2 id="b-val" style="font-family:Syne; font-size:35px; color:var(--green)">80%</h2>
-                    <span id="v-icon" style="font-size:28px">🚗</span>
-                </div>
-                <input type="range" id="b-slider" min="1" max="100" value="80" style="width:100%; accent-color:var(--green)" oninput="updateBatt(this.value)">
+    <div id="register-panel" class="hidden">
+        <div class="form-card">
+            <h2 style="font-family: 'Syne'; color: var(--blue-accent);">Registrati</h2>
+            <input type="text" placeholder="Nome Completo" style="margin-top:20px">
+            <input type="email" id="reg-email" placeholder="Email" style="margin-top:10px">
+            <input type="password" placeholder="Password" style="margin-top:10px">
+            <button class="btn-green" style="margin-top:20px; background:var(--blue-accent)" onclick="completeAuth('reg-email')">CREA ACCOUNT</button>
+            <p onclick="resetAuth()" style="margin-top:15px; cursor:pointer; text-decoration:underline; color: var(--muted);">Indietro</p>
+        </div>
+    </div>
+</div>
+
+<nav>
+    <div id="nav-logo-container"></div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <span id="user-display" style="font-weight: 600; color: var(--green);"></span>
+        <button onclick="location.reload()" style="background: #FFF0F0; color: #E74C3C; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold;">ESCI</button>
+    </div>
+</nav>
+
+<div class="main-content">
+    <aside>
+        <div class="card">
+            <h3 style="font-family: 'Syne'; font-size: 16px; margin-bottom: 5px;">🔋 Livello Batteria</h3>
+            <label style="text-transform: none;">Trascina per impostare la carica:</label>
+            <input type="range" id="battery-slider" min="1" max="100" value="80" oninput="updateBatteryUI(this.value)">
+            <div class="battery-display">
+                <span id="battery-val">80%</span>
+                <span id="km-val" style="color: var(--muted); font-size: 13px;">320 km</span>
             </div>
+        </div>
 
-            <div class="config-card">
-                <label>⚡ Veicolo Selezionato</label>
-                <select id="v-select" class="input-ui" onchange="document.getElementById('v-icon').innerText = this.value">
-                    <option value="🚗">Auto Elettrica</option>
-                    <option value="🛵">Scooter Elettrico</option>
-                    <option value="🚲">Bici Elettrica</option>
+        <div class="card">
+            <h2 style="font-family: 'Syne'; margin-bottom: 20px; font-size: 20px;">🗺️ Percorso</h2>
+            <div class="input-group">
+                <label>Partenza</label>
+                <select id="start-loc">
+                    <option value="Bolzano, BZ">Bolzano</option>
+                    <option value="Merano, BZ">Merano</option>
+                    <option value="Bressanone, BZ">Bressanone</option>
+                    <option value="Brunico, BZ">Brunico</option>
                 </select>
             </div>
-
-            <div class="config-card">
-                <label>📍 Itinerario</label>
-                <select id="start" class="input-ui"><option value="Bolzano">Bolzano</option><option value="Merano">Merano</option></select>
-                <select id="end" class="input-ui"><option value="Lago di Braies">Lago di Braies</option><option value="Ortisei">Ortisei</option></select>
+            <div class="input-group">
+                <label>Destinazione</label>
+                <select id="end-loc">
+                    <option value="Merano, BZ">Merano</option>
+                    <option value="Bolzano, BZ">Bolzano</option>
+                    <option value="Lago di Braies, BZ">Lago di Braies</option>
+                    <option value="Ortisei, BZ">Ortisei</option>
+                </select>
             </div>
-
-            <button id="go-btn" class="btn-action btn-green" onclick="loadMap()">Analizza Viaggio ➔</button>
-        </aside>
-
-        <main id="map-view">
-            <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight:700">
-                Analisi della mobilità pronta
+            <div class="input-group">
+                <label>Mezzo</label>
+                <select id="travel-mode">
+                    <option value="driving">🚗 Auto Elettrica</option>
+                    <option value="bicycling">🚲 Bicicletta Elettrica</option>
+                </select>
             </div>
-        </main>
-    </div>
+            <button class="btn-green" onclick="updateTrip()">VEDI TRAGITTO</button>
+        </div>
+    </aside>
 
-    <script>
-        let currentBatt = 80;
+    <main>
+        <div class="map-container" id="map-frame">
+            <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted); text-align:center; padding: 40px;">
+                <p>Configura il viaggio e premi il tasto verde per visualizzare il tragitto su Google Maps con i punti di interesse.</p>
+            </div>
+        </div>
+    </main>
+</div>
 
-        function openForm(id) { closeForms(); document.getElementById('form-'+id).classList.add('active'); }
-        function closeForms() { document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active')); }
-        function backToMenu() { document.getElementById('auth-overlay').classList.remove('hidden'); closeForms(); }
+<script>
+    const MY_LOGO_URL = 'Immagine 2026-04-22 162701.png';
 
-        function processAuth(type) {
-            const email = (type === 'login') ? document.getElementById('l-email').value : document.getElementById('r-email').value;
-            const nome = (type === 'reg') ? document.getElementById('r-nome').value : "";
-            if(email.includes('@')) {
-                document.getElementById('auth-overlay').classList.add('hidden');
-                document.getElementById('user-tag').innerText = "DRIVER: " + (nome || email.split('@')[0]).toUpperCase();
-            } else { alert("Compila i campi correttamente!"); }
-        }
-
-        const povData = {
-            "Bolzano-Lago di Braies": {
-                text: "POV: I prati di Ferrara",
-                coords: "46.7214,12.1332"
-            },
-            "Bolzano-Ortisei": {
-                text: "POV: Castel Forte (Trostburg)",
-                coords: "46.5910,11.5367"
-            },
-            "Merano-Lago di Braies": {
-                text: "POV: Contrasto Meleti/Dolomiti",
-                coords: "46.7322,11.5833"
-            },
-            "Merano-Ortisei": {
-                text: "POV: Gruppo del Sassolungo",
-                coords: "46.5761,11.6601"
-            }
+    function setupLogos() {
+        const logoBox = document.getElementById('main-logo-box');
+        const navContainer = document.getElementById('nav-logo-container');
+        const img = document.createElement('img');
+        img.src = MY_LOGO_URL;
+        img.onload = function() {
+            logoBox.appendChild(img.cloneNode(true));
+            logoBox.style.width = (img.clientWidth + 30) + "px";
+            const navImg = img.cloneNode(true);
+            navImg.className = 'nav-logo-img';
+            navContainer.appendChild(navImg);
         };
-        
-        function updateBatt(v) {
-            currentBatt = v;
-            document.getElementById('b-val').innerText = v + "%";
-            const btn = document.getElementById('go-btn');
-            if(v <= 20) {
-                document.getElementById('b-val').style.color = "var(--red)";
-                btn.className = "btn-action btn-red";
-                btn.innerText = "SOS RICARICA ⚡";
-            } else {
-                document.getElementById('b-val').style.color = "var(--green)";
-                btn.className = "btn-action btn-green";
-                btn.innerText = "Analizza Viaggio ➔";
-            }
-        }
+    }
 
-        function loadMap() {
-            const s = document.getElementById('start').value;
-            const e = document.getElementById('end').value;
+    // Funzione per muovere la batteria
+    function updateBatteryUI(val) {
+        document.getElementById('battery-val').innerText = val + "%";
+        document.getElementById('km-val').innerText = (val * 4) + " km";
+    }
 
-            // Recupero dati POV e Coordinate
-            const routeKey = `${s}-${e}`;
-            const povObj = povData[routeKey];
+    function showForm(type) {
+        document.getElementById('initial-choice').classList.add('hidden');
+        document.getElementById('login-panel').classList.add('hidden');
+        document.getElementById('register-panel').classList.add('hidden');
+        document.getElementById(type + '-panel').classList.remove('hidden');
+    }
 
-            // Gestione stato della batteria
-            let destinationCoord = (currentBatt <= 20) ? "stazioni ricarica" : povObj.coords;
-            let badgeText = (currentBatt <= 20) ? "RICARICA NECESSARIA" : povObj.text;
-            let color = (currentBatt <= 20) ? "var(--red)" : "var(--dark)";
-            
-            // CORREZIONE: Sostituita la variabile inesistente 'query' con 'destinationCoord'
-            const url = `https://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&q=${encodeURIComponent(destinationCoord)}&output=embed`;
-            
-            document.getElementById('map-view').innerHTML = `
-                <div class="map-badge" style="background:${color}; top: 20px; border: 2px solid white;">
-                    📍 ${badgeText.toUpperCase()}
-                </div>
-                <iframe src="${url}" style="filter: grayscale(0.2) contrast(1.1);"></iframe>
-            `;
-        }
-    </script>
+    function resetAuth() {
+        document.getElementById('initial-choice').classList.remove('hidden');
+        document.getElementById('login-panel').classList.add('hidden');
+        document.getElementById('register-panel').classList.add('hidden');
+    }
+
+    function completeAuth(id) {
+        const mail = document.getElementById(id).value;
+        if(mail.includes('@')) {
+            document.getElementById('auth-overlay').classList.add('hidden');
+            document.getElementById('user-display').innerText = mail;
+        } else { alert("Inserisci un'email valida!"); }
+    }
+
+    function updateTrip() {
+        const start = document.getElementById('start-loc').value;
+        const end = document.getElementById('end-loc').value;
+        // Costruiamo l'URL che forza la visualizzazione del tragitto (Route)
+        const mapUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(start)}&daddr=${encodeURIComponent(end)}&output=embed&t=m`;
+        document.getElementById('map-frame').innerHTML = `<iframe src="${mapUrl}"></iframe>`;
+    }
+
+    window.onload = setupLogos;
+</script>
+
 </body>
 </html>
