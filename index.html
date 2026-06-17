@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Found-it — Mobility Expert</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght=800&family=DM+Sans:wght=400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -89,6 +89,15 @@
             text-transform:uppercase;
             letter-spacing:-2px;
             transition:transform 0.5s;
+            display:flex;
+            align-items:center;
+            gap:20px;
+        }
+
+        .hero-title h2 img {
+            height: 80px;
+            width: auto;
+            display: block;
         }
 
         .auth-side:hover .hero-title h2{
@@ -291,23 +300,17 @@
 
 <body>
 
-    <!-- =========================
-         LOGIN / REGISTER
-    ========================== -->
-
     <div id="auth-overlay">
 
-        <!-- LOGIN -->
         <div class="auth-side side-login" onclick="openForm('login')">
 
             <div class="side-bg-icon">🔑</div>
 
             <div class="hero-title">
-                <div class="logo-box">
-                    <img src="logo.png" alt="Logo">
-                </div>
-
-                <h2>Accedi</h2>
+                <h2>
+                    <img src="logo.png" alt="Logo Found-it">
+                    Accedi
+                </h2>
             </div>
 
             <div class="form-container" id="form-login" onclick="event.stopPropagation()">
@@ -346,17 +349,15 @@
             </div>
         </div>
 
-        <!-- REGISTER -->
         <div class="auth-side side-reg" onclick="openForm('reg')">
 
             <div class="side-bg-icon">🚀</div>
 
             <div class="hero-title">
-                <div class="logo-box">
-                    <img src="logo.png" alt="Logo">
-                </div>
-
-                <h2>Registrati</h2>
+                <h2>
+                    <img src="logo.png" alt="Logo Found-it">
+                    Registrati
+                </h2>
             </div>
 
             <div class="form-container" id="form-reg" onclick="event.stopPropagation()">
@@ -399,10 +400,6 @@
         </div>
     </div>
 
-    <!-- =========================
-         NAVBAR
-    ========================== -->
-
     <nav>
 
         <img src="logo.png" style="height:45px">
@@ -422,10 +419,6 @@
 
         </div>
     </nav>
-
-    <!-- =========================
-         LAYOUT
-    ========================== -->
 
     <div class="main-layout">
 
@@ -502,8 +495,6 @@
 
         </aside>
 
-        <!-- MAPPA -->
-
         <main id="map-view">
 
             <div style="
@@ -519,10 +510,6 @@
 
         </main>
     </div>
-
-    <!-- =========================
-         SCRIPT
-    ========================== -->
 
     <script>
 
